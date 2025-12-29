@@ -1,7 +1,11 @@
-FROM --platform=linux/amd64 vllm/vllm-openai:v0.10.1.1
+# Utiliser une version vLLM compatible avec CUDA 11.8/12.1
+FROM --platform=linux/amd64 vllm/vllm-openai:v0.6.3
+
+# Ou essayez cette version
+# FROM --platform=linux/amd64 vllm/vllm-openai:v0.8.0
 
 LABEL org.opencontainers.image.source=https://github.com/devsaturn/mineru-ocr
-LABEL org.opencontainers.image.description="MinerU OCR Server for RunPod Serverless"
+LABEL org.opencontainers.image.description="MinerU OCR Server for RunPod"
 
 # Install dependencies
 RUN apt-get update && \
@@ -29,7 +33,6 @@ WORKDIR /app
 # Copy handler
 COPY handler.py /app/handler.py
 
-# Expose port (pour les logs, même si serverless n'utilise pas vraiment de port)
 EXPOSE 8000
 
 # RunPod Serverless handler
