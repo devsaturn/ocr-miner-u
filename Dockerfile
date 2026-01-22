@@ -43,7 +43,7 @@ RUN pip3 install "magic-pdf[full]" runpod fastapi uvicorn python-multipart --no-
 RUN echo '{"device-mode":"cuda"}' > /root/magic-pdf.json
 
 # Téléchargement des modèles (Cette étape prend du temps au build)
-RUN mineru-models-download -s huggingface -m all
+#RUN mineru-models-download -s huggingface -m all
 
 WORKDIR /app
 COPY main.py .
