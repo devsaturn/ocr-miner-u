@@ -1,30 +1,29 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting MinerU OpenAI-Compatible Server..."
+echo "🚀 Starting MinerU Server Wrapper..."
 echo "=============================================="
 
-# Afficher les infos GPU
-echo "GPU Information:"
-nvidia-smi || echo "⚠️  No GPU detected"
-echo ""
+# Afficher les infos GPU (utile pour le debug sur RunPod)
+if command -v nvidia-smi &> /dev/null; then
+    nvidia-smi
+else
+    echo "⚠️  No GPU detected or nvidia-smi not found"
+fi
 
-# Variables d'environnement
+# Variables d'environnement par défaut
 export HOST=${HOST:-0.0.0.0}
 export PORT=${PORT:-8000}
-export MODEL_DIR=${MODEL_DIR:-/root/.cache/huggingface}
 
-# Afficher la configuration
-echo "Configuration:"
-echo "  Host: $HOST"
-echo "  Port: $PORT"
-echo "  Model Directory: $MODEL_DIR"
-echo ""
-
-# Démarrer le serveur OpenAI-compatible
-echo "Starting OpenAI-compatible server..."
-
-# Selon la doc MinerU, la commande est :
-exec magic-pdf-server \
-    --host $HOST \
-    --port $PORT
+# Vérification si on est sur RunPod Serverless
+if [ -n "$RUNPOD_POD_ID" ]; then
+    echo "Mode: RunPod Serverless Detecté"
+    # Sur RunPod Serverless, on lance directement le script python 
+    # qui contient runpod.serverless.start
+    exec python3 -u /app/main.py
+else
+    echo "Mode: Standard HTTP (Cloud Run / Local)"
+    echo "Configuration: $HOST:$PORT"
+    # On utilise uvicorn pour lancer l'interface FastAPI (OpenAI compatible)
+    exec uvicorn main:app --host $HOST --port $PORT
+fi
